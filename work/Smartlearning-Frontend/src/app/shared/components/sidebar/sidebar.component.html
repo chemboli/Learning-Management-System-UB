@@ -1,0 +1,65 @@
+<!-- Mobile sidebar toggle (the brand/user/sign-out live in the main top bar now) -->
+<button
+  class="sl-mobile-toggle d-flex d-lg-none align-items-center justify-content-center"
+  (click)="toggleMobile()"
+  aria-label="Toggle menu"
+>
+  <i class="bi bi-list fs-4"></i>
+</button>
+
+<!-- Backdrop for mobile -->
+@if (mobileOpen()) {
+  <div class="sl-sidebar-backdrop d-lg-none" (click)="closeMobile()"></div>
+}
+
+<aside
+  class="sl-sidebar"
+  [class.collapsed]="collapsed()"
+  [class.mobile-open]="mobileOpen()"
+>
+  <div class="sl-sidebar-toolbar d-none d-lg-flex">
+    <button class="btn btn-link text-white p-0 ms-auto" (click)="toggleCollapsed()" title="Collapse menu">
+      <i class="bi" [class.bi-chevron-double-left]="!collapsed()" [class.bi-chevron-double-right]="collapsed()"></i>
+    </button>
+  </div>
+
+  <nav class="sl-sidebar-nav">
+    @for (section of visibleSections(); track section.label) {
+      <div class="sl-nav-section">
+        <button
+          type="button"
+          class="sl-nav-section-toggle"
+          (click)="toggleSection(section.label)"
+          [class.active]="isSectionOpen(section.label)"
+        >
+          <i class="bi {{ section.icon }} sl-nav-icon"></i>
+          @if (!collapsed()) {
+            <span class="flex-grow-1 text-start">{{ section.label }}</span>
+            <i class="bi bi-chevron-down sl-chevron" [class.rotated]="isSectionOpen(section.label)"></i>
+          }
+        </button>
+
+        @if (isSectionOpen(section.label) || collapsed()) {
+          <ul class="sl-nav-children" [class.list-unstyled]="true">
+            @for (child of section.children; track child.label) {
+              <li>
+                <a
+                  [routerLink]="child.link"
+                  routerLinkActive="active"
+                  class="sl-nav-link"
+                  (click)="closeMobile()"
+                  [title]="child.label"
+                >
+                  <i class="bi {{ child.icon }} sl-nav-icon"></i>
+                  @if (!collapsed()) {
+                    <span>{{ child.label }}</span>
+                  }
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </nav>
+</aside>

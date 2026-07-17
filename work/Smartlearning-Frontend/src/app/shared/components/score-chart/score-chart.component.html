@@ -1,0 +1,33 @@
+<div class="score-chart" *ngIf="bars.length > 0; else noData">
+  <div class="score-chart-bars">
+    <div
+      *ngFor="let bar of bars; let i = index"
+      class="score-chart-bar-wrap"
+      (mouseenter)="setHover(i)"
+      (mouseleave)="setHover(null)"
+    >
+      <div class="score-chart-tooltip" *ngIf="hoveredIndex() === i">
+        {{ bar.label }}: {{ bar.value }}{{ valueSuffix }}
+        <ng-container *ngIf="bar.maxValue">/ {{ bar.maxValue }}{{ valueSuffix }}</ng-container>
+      </div>
+
+      <div class="score-chart-track">
+        <div
+          class="score-chart-bar-max"
+          *ngIf="bar.maxValue"
+          [style.height.%]="barHeightPercent(bar.maxValue)"
+        ></div>
+        <div
+          class="score-chart-bar-value"
+          [style.height.%]="barHeightPercent(bar.value)"
+        ></div>
+      </div>
+
+      <div class="score-chart-label text-truncate" [title]="bar.label">{{ bar.label }}</div>
+    </div>
+  </div>
+</div>
+
+<ng-template #noData>
+  <div class="text-muted small text-center py-3">No data to chart yet.</div>
+</ng-template>

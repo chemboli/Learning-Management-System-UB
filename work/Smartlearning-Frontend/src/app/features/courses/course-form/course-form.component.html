@@ -1,0 +1,116 @@
+<div class="page-header">
+  <h1 class="h3 mb-1">{{ isEdit ? 'Edit course' : 'New course' }}</h1>
+  <p class="lead mb-0">
+    {{ isEdit ? 'Update the details for this course.' : 'Add a new course to the catalog.' }}
+  </p>
+</div>
+
+@if (loading) {
+  <div class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else {
+  <div class="card" style="max-width: 720px;">
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-semibold" for="courseCode">Course code</label>
+            <input
+              id="courseCode"
+              type="text"
+              class="form-control"
+              formControlName="courseCode"
+              placeholder="e.g. CS301"
+              [class.is-invalid]="submitted && form.controls.courseCode.invalid"
+            />
+            @if (isEdit) {
+              <div class="form-text">Course code can't be changed.</div>
+            }
+            @if (submitted && form.controls.courseCode.invalid) {
+              <div class="invalid-feedback">Course code is required.</div>
+            }
+          </div>
+
+          <div class="col-md-8 mb-3">
+            <label class="form-label fw-semibold" for="title">Title</label>
+            <input
+              id="title"
+              type="text"
+              class="form-control"
+              formControlName="title"
+              placeholder="e.g. Database Systems"
+              [class.is-invalid]="submitted && form.controls.title.invalid"
+            />
+            @if (submitted && form.controls.title.invalid) {
+              <div class="invalid-feedback">Title is required.</div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="description">Description</label>
+          <textarea
+            id="description"
+            class="form-control"
+            rows="3"
+            formControlName="description"
+            placeholder="What will students learn in this course?"
+          ></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-semibold" for="creditHours">Credit hours</label>
+            <input
+              id="creditHours"
+              type="number"
+              min="1"
+              class="form-control"
+              formControlName="creditHours"
+              [class.is-invalid]="submitted && form.controls.creditHours.invalid"
+            />
+            @if (submitted && form.controls.creditHours.invalid) {
+              <div class="invalid-feedback">Enter a valid number of credit hours.</div>
+            }
+          </div>
+
+          <div class="col-md-8 mb-3">
+            <label class="form-label fw-semibold" for="lecturerId">Lecturer</label>
+            <select
+              id="lecturerId"
+              class="form-select"
+              formControlName="lecturerId"
+              [class.is-invalid]="submitted && form.controls.lecturerId.invalid"
+            >
+              <option value="" disabled>Select a lecturer…</option>
+              @for (lecturer of lecturers; track lecturer.id) {
+                <option [value]="lecturer.id">{{ lecturer.firstName }} {{ lecturer.lastName }}</option>
+              }
+            </select>
+            @if (submitted && form.controls.lecturerId.invalid) {
+              <div class="invalid-feedback">Select a lecturer for this course.</div>
+            }
+          </div>
+        </div>
+
+        @if (isEdit) {
+          <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" id="active" formControlName="active" />
+            <label class="form-check-label fw-semibold" for="active">Course is active</label>
+          </div>
+        }
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary fw-semibold" [disabled]="saving">
+            @if (saving) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            {{ isEdit ? 'Save changes' : 'Create course' }}
+          </button>
+          <a class="btn btn-outline-secondary" routerLink="/courses">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+}

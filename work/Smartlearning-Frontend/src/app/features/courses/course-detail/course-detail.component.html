@@ -1,0 +1,225 @@
+@if (loading) {
+  <div class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else if (course) {
+  <div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+      <span class="badge bg-light text-sky mb-2">{{ course.courseCode }}</span>
+      <h1 class="h3 mb-1">{{ course.title }}</h1>
+      <p class="lead mb-1">{{ course.description || 'No description provided.' }}</p>
+      <p class="mb-0 small">
+        <i class="bi bi-person me-1"></i>{{ course.lecturerName }}
+        <span class="mx-2">·</span>
+        <i class="bi bi-clock me-1"></i>{{ course.creditHours }} credit hours
+        <span class="mx-2">·</span>
+        @if (course.active) {
+          <span class="badge text-bg-success">Active</span>
+        } @else {
+          <span class="badge text-bg-secondary">Inactive</span>
+        }
+      </p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      @if (auth.hasAnyRole('STUDENT')) {
+        @if (enrolled) {
+          <button class="btn btn-light fw-semibold" (click)="unenroll()" [disabled]="enrollLoading">
+            @if (enrollLoading) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            <i class="bi bi-x-circle me-1"></i> Unenroll
+          </button>
+        } @else {
+          <button class="btn btn-light fw-semibold" (click)="enroll()" [disabled]="enrollLoading">
+            @if (enrollLoading) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            <i class="bi bi-plus-circle me-1"></i> Enroll
+          </button>
+        }
+      }
+
+      @if (auth.hasAnyRole('MASTER', 'ADMIN')) {
+        <a class="btn btn-light fw-semibold" [routerLink]="['/courses', course.id, 'edit']">
+          <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+        <button class="btn btn-outline-light fw-semibold" (click)="deleteCourse()">
+          <i class="bi bi-trash me-1"></i> Delete
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (announcements.length > 0 || announcementsLoading) {
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Announcements</h2>
+          <a routerLink="/announcements" class="small">View all</a>
+        </div>
+
+        @if (announcementsLoading) {
+          <div class="text-center py-3">
+            <span class="spinner-border text-primary"></span>
+          </div>
+        } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (a of announcements; track a.id) {
+              <div class="border rounded p-2">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span
+                    class="badge"
+                    [class.text-bg-danger]="a.priority === 'URGENT'"
+                    [class.text-bg-warning]="a.priority === 'HIGH'"
+                    [class.text-bg-info]="a.priority === 'NORMAL'"
+                    [class.text-bg-secondary]="a.priority === 'LOW'"
+                  >{{ a.priority }}</span>
+                  <span class="fw-semibold">{{ a.title }}</span>
+                </div>
+                <p class="text-muted small mb-1 announcement-body">{{ a.body }}</p>
+                <p class="text-muted small mb-0">{{ a.createdAt | date: 'medium' }} · {{ a.authorName }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Course notes</h2>
+        @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+          <a class="btn btn-sm btn-primary" [routerLink]="['/notes/upload']" [queryParams]="{ courseId: course.id }">
+            <i class="bi bi-cloud-upload me-1"></i> Upload note
+          </a>
+        }
+      </div>
+
+      @if (notesLoading) {
+        <div class="text-center py-4">
+          <span class="spinner-border text-primary"></span>
+        </div>
+      } @else if (notes.length === 0) {
+        <div class="empty-state py-4">
+          <i class="bi bi-file-earmark-text"></i>
+          <p class="mb-0">No notes have been published for this course yet.</p>
+        </div>
+      } @else {
+        <div class="list-group">
+          @for (note of notes; track note.id) {
+            <div class="list-group-item d-flex justify-content-between align-items-start gap-3 flex-wrap">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-sky-50 text-sky">{{ noteTypeLabel(note.noteType) }}</span>
+                  @if (note.weekNumber) {
+                    <span class="badge text-bg-light text-muted">Week {{ note.weekNumber }}</span>
+                  }
+                  <h3 class="h6 mb-0">{{ note.title }}</h3>
+                </div>
+                <p class="text-muted small mb-1">{{ note.description }}</p>
+                <p class="text-muted small mb-0">
+                  <i class="bi bi-person me-1"></i>{{ note.lecturerName }}
+                  <span class="mx-2">·</span>
+                  <i class="bi bi-calendar me-1"></i>{{ note.uploadedAt | date: 'mediumDate' }}
+                </p>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" (click)="previewNote(note)">
+                  <i class="bi bi-eye me-1"></i> Preview
+                </button>
+                <a class="btn btn-sm btn-outline-primary" [href]="note.downloadUrl" target="_blank" rel="noopener">
+                  <i class="bi bi-download me-1"></i> Download
+                </a>
+                @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+                  <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/notes', note.id, 'edit']">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteNote(note.id)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER') && hasChartableAssignments()) {
+    <div class="card mt-3">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Average score by assignment</h2>
+        <app-score-chart [bars]="courseScoreChartBars()" />
+      </div>
+    </div>
+  }
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Assignments</h2>
+        @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+          <a class="btn btn-sm btn-primary" [routerLink]="['/assignments/new']" [queryParams]="{ courseId: course.id }">
+            <i class="bi bi-plus-lg me-1"></i> New assignment
+          </a>
+        }
+      </div>
+
+      @if (assignmentsLoading) {
+        <div class="text-center py-4">
+          <span class="spinner-border text-primary"></span>
+        </div>
+      } @else if (assignments.length === 0) {
+        <div class="empty-state py-4">
+          <i class="bi bi-clipboard"></i>
+          <p class="mb-0">No assignments have been posted for this course yet.</p>
+        </div>
+      } @else {
+        <div class="list-group">
+          @for (a of assignments; track a.id) {
+            <a class="list-group-item d-flex justify-content-between align-items-center gap-3 flex-wrap list-group-item-action" [routerLink]="['/assignments', a.id]">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <h3 class="h6 mb-0">{{ a.title }}</h3>
+                  @if (!a.published) {
+                    <span class="badge text-bg-secondary">Draft</span>
+                  }
+                  @if (a.overdue) {
+                    <span class="badge text-bg-danger">Past due</span>
+                  }
+                  @if (a.mySubmissionStatus === 'SUBMITTED') {
+                    <span class="badge text-bg-info">Submitted</span>
+                  }
+                  @if (a.mySubmissionStatus === 'REVIEWED') {
+                    <span class="badge text-bg-success">Reviewed</span>
+                  }
+                  @if (a.mySubmissionStatus === 'NOT_SUBMITTED' && !a.overdue) {
+                    <span class="badge bg-sky-50 text-sky">Not submitted</span>
+                  }
+                </div>
+                <p class="text-muted small mb-0">
+                  <i class="bi bi-calendar-event me-1"></i>Due {{ a.dueDate | date: 'medium' }}
+                  @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+                    <span class="mx-2">·</span>
+                    <i class="bi bi-people me-1"></i>{{ a.submissionCount }} submission(s)
+                  }
+                </p>
+              </div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="empty-state">
+    <i class="bi bi-exclamation-triangle"></i>
+    <p class="mb-0">Course not found.</p>
+  </div>
+}

@@ -1,0 +1,234 @@
+<div class="page-header">
+  <h1 class="h3 mb-1">{{ isEdit ? 'Edit assignment' : 'New assignment' }}</h1>
+  <p class="lead mb-0">
+    {{ isEdit ? 'Update the assignment details.' : 'Post a new assignment for students to submit work against.' }}
+  </p>
+</div>
+
+@if (loading) {
+  <div class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else {
+  @if (!isEdit && aiAvailable) {
+    <div class="card mb-3" style="max-width: 960px;">
+      <div class="card-body">
+        <h2 class="h6 mb-2">Generate a draft</h2>
+        <p class="text-muted small mb-2">
+          Describe what was covered and get a starting draft to edit
+          @if (isProgramming) { , including test cases }.
+        </p>
+        <div class="d-flex gap-2">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="e.g. We covered binary search trees today, give a follow-up assignment"
+            [(ngModel)]="aiPrompt"
+            [disabled]="generating"
+          />
+          <button type="button" class="btn btn-outline-primary flex-shrink-0" [disabled]="generating" (click)="generateWithAi()">
+            @if (generating) {
+              <span class="spinner-border spinner-border-sm me-1"></span> Generating…
+            } @else {
+              Generate
+            }
+          </button>
+        </div>
+        @if (lastGenerationDisclaimer) {
+          <div class="form-text mt-2">{{ lastGenerationDisclaimer }}</div>
+        }
+      </div>
+    </div>
+  } @else if (!isEdit && !aiAvailable) {
+    <div class="alert alert-secondary mb-3" style="max-width: 960px;">
+      Draft generation isn't set up on this server yet.
+    </div>
+  }
+
+  <div class="card" style="max-width: 960px;">
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (!isEdit) {
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="courseId">Course</label>
+            <select
+              id="courseId"
+              class="form-select"
+              formControlName="courseId"
+              [class.is-invalid]="submitted && form.controls.courseId.invalid"
+            >
+              <option value="" disabled>Select a course…</option>
+              @for (course of courses; track course.id) {
+                <option [value]="course.id">{{ course.courseCode }} — {{ course.title }}</option>
+              }
+            </select>
+            @if (submitted && form.controls.courseId.invalid) {
+              <div class="invalid-feedback">Select a course.</div>
+            }
+          </div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="title">Title</label>
+          <input
+            id="title"
+            type="text"
+            class="form-control"
+            formControlName="title"
+            placeholder="e.g. Assignment 2 — Query optimization"
+            [class.is-invalid]="submitted && form.controls.title.invalid"
+          />
+          @if (submitted && form.controls.title.invalid) {
+            <div class="invalid-feedback">Title is required.</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="description">Description</label>
+          <textarea
+            id="description"
+            class="form-control"
+            rows="4"
+            formControlName="description"
+            placeholder="Instructions for the assignment"
+          ></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="dueDate">Due date</label>
+          <input
+            id="dueDate"
+            type="datetime-local"
+            class="form-control"
+            formControlName="dueDate"
+            [class.is-invalid]="submitted && form.controls.dueDate.invalid"
+          />
+          @if (submitted && form.controls.dueDate.invalid) {
+            <div class="invalid-feedback">Set a due date.</div>
+          }
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold" for="assignmentType">Assignment type</label>
+            <select id="assignmentType" class="form-select" formControlName="assignmentType">
+              <option value="REGULAR">Regular (file upload, manually graded)</option>
+              <option value="PROGRAMMING">Programming (auto-graded by running code)</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 mb-3">
+            <label class="form-label fw-semibold" for="maxScore">Max score</label>
+            <input
+              id="maxScore"
+              type="number"
+              class="form-control"
+              formControlName="maxScore"
+              min="1"
+              [class.is-invalid]="submitted && form.controls.maxScore.invalid"
+            />
+          </div>
+
+          @if (isProgramming) {
+            <div class="col-md-3 mb-3">
+              <label class="form-label fw-semibold" for="programmingLanguage">Language</label>
+              <select id="programmingLanguage" class="form-select" formControlName="programmingLanguage">
+                <option value="JAVA">Java</option>
+                <option value="PYTHON">Python</option>
+                <option value="C">C</option>
+                <option value="CPP">C++</option>
+              </select>
+            </div>
+          }
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label fw-semibold" for="latePenaltyPercent">Late penalty (% per day)</label>
+            <input
+              id="latePenaltyPercent"
+              type="number"
+              class="form-control"
+              formControlName="latePenaltyPercent"
+              min="0"
+              max="100"
+              [class.is-invalid]="submitted && form.controls.latePenaltyPercent.invalid"
+            />
+            <div class="form-text">
+              Deducted from the auto-graded score for each full day a submission is late. 0 = no penalty.
+              Only applies to automatically graded programming submissions — manual grades are never adjusted.
+            </div>
+          </div>
+        </div>
+
+        @if (isProgramming) {
+          <div class="mb-4 p-3 border rounded">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label fw-semibold mb-0">Test cases (stdin → expected stdout)</label>
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="addTestCase()">
+                <i class="bi bi-plus-lg me-1"></i> Add test case
+              </button>
+            </div>
+
+            @if (testCases.length === 0) {
+              <p class="text-muted small mb-0">No test cases yet. Add at least one to enable automated grading.</p>
+            }
+
+            @for (tc of testCases.controls; track $index) {
+              <div class="border rounded p-2 mb-2" [formGroup]="tc">
+                <div class="row g-2 align-items-start">
+                  <div class="col-md-3">
+                    <label class="form-label small">Label</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="label" placeholder="e.g. Basic case" />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small">Stdin input</label>
+                    <textarea class="form-control form-control-sm" formControlName="input" rows="2"></textarea>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small">Expected stdout</label>
+                    <textarea
+                      class="form-control form-control-sm"
+                      formControlName="expectedOutput"
+                      rows="2"
+                      [class.is-invalid]="submitted && tc.controls['expectedOutput'].invalid"
+                    ></textarea>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small">Weight (pts)</label>
+                    <input type="number" class="form-control form-control-sm" formControlName="weight" min="0.1" step="0.5" />
+                  </div>
+                  <div class="col-md-1 d-flex flex-column align-items-center justify-content-between h-100">
+                    <div class="form-check mt-4">
+                      <input class="form-check-input" type="checkbox" formControlName="hidden" title="Hidden from students" />
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-1" (click)="removeTestCase($index)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="form-text">Checked = hidden test case (input/expected output withheld from students).</div>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="form-check form-switch mb-4">
+          <input class="form-check-input" type="checkbox" id="published" formControlName="published" />
+          <label class="form-check-label fw-semibold" for="published">Publish to students</label>
+          <div class="form-text">Unpublished assignments won't be visible to students yet.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary fw-semibold" [disabled]="saving">
+            @if (saving) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            {{ isEdit ? 'Save changes' : 'Create assignment' }}
+          </button>
+          <a class="btn btn-outline-secondary" routerLink="/courses">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+}

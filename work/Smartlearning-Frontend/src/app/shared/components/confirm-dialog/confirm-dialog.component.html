@@ -1,0 +1,21 @@
+<div class="modal d-block" tabindex="-1" style="background: rgba(12,74,110,0.35);" *ngIf="confirmService.state().visible">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">{{ confirmService.state().title }}</h5>
+        <button type="button" class="btn-close" (click)="confirmService.cancel()"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">{{ confirmService.state().message }}</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" (click)="confirmService.cancel()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmService.confirm()">
+          {{ confirmService.state().confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

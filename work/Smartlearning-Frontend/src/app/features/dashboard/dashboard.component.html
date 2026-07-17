@@ -1,0 +1,203 @@
+<div class="page-header">
+  <h1 class="h3 mb-1">Welcome back{{ auth.email() ? ',' : '' }} {{ auth.email() }}</h1>
+  <p class="lead mb-0">
+    @switch (auth.role()) {
+      @case ('STUDENT') { Browse your courses, check assignments, and catch up on notes. }
+      @case ('LECTURER') { Manage your courses, assignments, and course materials. }
+      @case ('ADMIN') { Manage courses, users, and enrollments. }
+      @case ('MASTER') { Full administrative access to SmartLearning. }
+      @default { Complete your profile to get started. }
+    }
+  </p>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Account</h2>
+        <dl class="row mb-0 small">
+          <dt class="col-4 text-muted">Email</dt>
+          <dd class="col-8">{{ auth.email() }}</dd>
+          <dt class="col-4 text-muted">Role</dt>
+          <dd class="col-8"><span class="badge role-badge role-{{ auth.role() }}">{{ auth.role() }}</span></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h6 mb-0">Latest announcements</h2>
+          <a routerLink="/announcements" class="small">View all</a>
+        </div>
+
+        @if (announcementsLoading) {
+          <div class="text-center py-2">
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          </div>
+        } @else if (announcements.length === 0) {
+          <p class="text-muted small mb-0">No announcements right now.</p>
+        } @else {
+          <ul class="list-unstyled mb-0 small d-flex flex-column gap-2">
+            @for (a of announcements; track a.id) {
+              <li class="d-flex gap-2 align-items-start">
+                <span
+                  class="badge mt-1"
+                  [class.text-bg-danger]="a.priority === 'URGENT'"
+                  [class.text-bg-warning]="a.priority === 'HIGH'"
+                  [class.text-bg-info]="a.priority === 'NORMAL' || a.priority === 'LOW'"
+                >&nbsp;</span>
+                <div>
+                  <div class="fw-semibold">{{ a.title }}</div>
+                  <div class="text-muted">{{ a.createdAt | date: 'mediumDate' }}</div>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-sm-6 col-lg-3">
+    <a routerLink="/courses" class="text-decoration-none">
+      <div class="card card-hover h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon bg-sky-50 text-sky"><i class="bi bi-journal-bookmark"></i></div>
+          <div>
+            <div class="fw-bold h5 mb-0">Courses</div>
+            <div class="text-muted small">Browse the catalog</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  @if (auth.hasAnyRole('STUDENT')) {
+    <div class="col-sm-6 col-lg-3">
+      <a routerLink="/my-courses" class="text-decoration-none">
+        <div class="card card-hover h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-sky-50 text-sky"><i class="bi bi-collection"></i></div>
+            <div>
+              <div class="fw-bold h5 mb-0">My courses</div>
+              <div class="text-muted small">Your enrollments</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  }
+
+  @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+    <div class="col-sm-6 col-lg-3">
+      <a routerLink="/notes/upload" class="text-decoration-none">
+        <div class="card card-hover h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-sky-50 text-sky"><i class="bi bi-cloud-upload"></i></div>
+            <div>
+              <div class="fw-bold h5 mb-0">Upload note</div>
+              <div class="text-muted small">Share course material</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  }
+
+  @if (auth.hasAnyRole('ADMIN', 'MASTER')) {
+    <div class="col-sm-6 col-lg-3">
+      <a routerLink="/users" class="text-decoration-none">
+        <div class="card card-hover h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-sky-50 text-sky"><i class="bi bi-people"></i></div>
+            <div>
+              <div class="fw-bold h5 mb-0">Users</div>
+              <div class="text-muted small">Manage accounts</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <a routerLink="/enrollments" class="text-decoration-none">
+        <div class="card card-hover h-100">
+          <div class="card-body d-flex align-items-center gap-3">
+            <div class="stat-icon bg-sky-50 text-sky"><i class="bi bi-clipboard-check"></i></div>
+            <div>
+              <div class="fw-bold h5 mb-0">Enrollments</div>
+              <div class="text-muted small">Track registrations</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  }
+
+  <div class="col-sm-6 col-lg-3">
+    <a routerLink="/profile" class="text-decoration-none">
+      <div class="card card-hover h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon bg-sky-50 text-sky"><i class="bi bi-person-circle"></i></div>
+          <div>
+            <div class="fw-bold h5 mb-0">Profile</div>
+            <div class="text-muted small">Account settings</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+@if (auth.hasAnyRole('STUDENT')) {
+  <div class="card mt-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3">My enrolled courses</h2>
+
+      @if (loading) {
+        <div class="text-center py-4">
+          <span class="spinner-border text-primary"></span>
+        </div>
+      } @else if (myCourses.length === 0) {
+        <div class="empty-state py-4">
+          <i class="bi bi-inbox"></i>
+          <p class="mb-2">You haven't enrolled in any courses yet.</p>
+          <a routerLink="/courses" class="btn btn-primary btn-sm">Browse courses</a>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Enrolled on</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of myCourses; track e.id) {
+                <tr>
+                  <td><span class="badge bg-sky-50 text-sky">{{ e.courseCode }}</span></td>
+                  <td>{{ e.courseTitle }}</td>
+                  <td class="text-muted">{{ e.enrolledAt | date: 'mediumDate' }}</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" [routerLink]="['/courses', e.courseId]">
+                      View course
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+}

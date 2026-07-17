@@ -1,0 +1,70 @@
+.score-chart {
+  width: 100%;
+}
+
+.score-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  height: 180px;
+  padding: 0 0.25rem;
+  overflow-x: auto;
+}
+
+.score-chart-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 0 48px;
+  min-width: 48px;
+  height: 100%;
+  position: relative;
+  cursor: default;
+}
+
+.score-chart-tooltip {
+  position: absolute;
+  top: -1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sl-sky-900, #0c4a6e);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.score-chart-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+}
+
+.score-chart-bar-max {
+  position: absolute;
+  bottom: 0;
+  width: 60%;
+  background: var(--sl-sky-100, #e0f2fe);
+  border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.score-chart-bar-value {
+  position: relative;
+  width: 40%;
+  background: var(--sl-sky-500, #0ea5e9);
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: height 0.2s ease;
+}
+
+.score-chart-label {
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--sl-sky-800, #075985);
+  max-width: 70px;
+  text-align: center;
+}

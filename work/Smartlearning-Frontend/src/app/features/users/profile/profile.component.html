@@ -1,0 +1,105 @@
+<div class="page-header">
+  <h1 class="h3 mb-1">My profile</h1>
+  <p class="lead mb-0">Update your personal information and password</p>
+</div>
+
+@if (loading) {
+  <div class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else {
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Personal information</h2>
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Email</label>
+              <input type="email" class="form-control" [value]="email" disabled />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Role</label>
+              <div>
+                <span class="badge role-badge role-{{ auth.role() }}">{{ auth.role() }}</span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold" for="firstName">First name</label>
+                <input id="firstName" type="text" class="form-control" formControlName="firstName" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold" for="lastName">Last name</label>
+                <input id="lastName" type="text" class="form-control" formControlName="lastName" />
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="matricule">
+                Matricule <span class="text-muted fw-normal">(optional)</span>
+              </label>
+              <input id="matricule" type="text" class="form-control" formControlName="matricule" />
+            </div>
+
+            <button type="submit" class="btn btn-primary fw-semibold" [disabled]="savingProfile">
+              @if (savingProfile) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Save changes
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Change password</h2>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="currentPassword">Current password</label>
+              <input
+                id="currentPassword"
+                type="password"
+                class="form-control"
+                formControlName="currentPassword"
+                [class.is-invalid]="passwordSubmitted && passwordForm.controls.currentPassword.invalid"
+              />
+              @if (passwordSubmitted && passwordForm.controls.currentPassword.invalid) {
+                <div class="invalid-feedback">Enter your current password.</div>
+              }
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="newPassword">New password</label>
+              <input
+                id="newPassword"
+                type="password"
+                class="form-control"
+                formControlName="newPassword"
+                placeholder="At least 6 characters"
+                [class.is-invalid]="passwordSubmitted && passwordForm.controls.newPassword.invalid"
+              />
+              @if (passwordSubmitted && passwordForm.controls.newPassword.invalid) {
+                <div class="invalid-feedback">New password must be at least 6 characters.</div>
+              }
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary fw-semibold" [disabled]="savingPassword">
+              @if (savingPassword) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Update password
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+}

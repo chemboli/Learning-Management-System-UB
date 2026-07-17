@@ -1,0 +1,91 @@
+<div class="preview-backdrop" *ngIf="file()" (click)="close()">
+  <div class="preview-modal" (click)="$event.stopPropagation()">
+
+    <div class="preview-header">
+      <div class="preview-title">
+        <i class="bi bi-file-earmark me-2"></i>
+        <span class="text-truncate">{{ file()?.fileName }}</span>
+      </div>
+      <div class="preview-actions">
+        <a
+          class="btn btn-sm btn-outline-secondary me-2"
+          [href]="file()?.url"
+          target="_blank"
+          rel="noopener"
+          download
+        >
+          <i class="bi bi-download me-1"></i>Download
+        </a>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+      </div>
+    </div>
+
+    <div class="preview-body">
+
+      <!-- PDF (rendered from a fetched blob, not a direct iframe src) -->
+      <ng-container *ngIf="kind() === 'pdf'">
+        <div class="preview-center" *ngIf="pdfLoading()">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        <div class="preview-center preview-unsupported" *ngIf="pdfError()">
+          <i class="bi bi-exclamation-triangle display-4 text-muted"></i>
+          <p class="mt-3 text-muted">
+            Couldn't load a preview of this document.<br />
+            Please download it to view the contents.
+          </p>
+        </div>
+        <iframe
+          *ngIf="safePdfUrl()"
+          [src]="safePdfUrl()"
+          class="preview-frame"
+          title="Document preview"
+        ></iframe>
+      </ng-container>
+
+      <!-- Image -->
+      <div class="preview-center" *ngIf="kind() === 'image'">
+        <img [src]="file()?.url" [alt]="file()?.fileName" class="preview-image" />
+      </div>
+
+      <!-- Video -->
+      <div class="preview-center" *ngIf="kind() === 'video'">
+        <video [src]="file()?.url" controls class="preview-video"></video>
+      </div>
+
+      <!-- Audio -->
+      <div class="preview-center" *ngIf="kind() === 'audio'">
+        <audio [src]="file()?.url" controls class="preview-audio"></audio>
+      </div>
+
+      <!-- Plain text / code -->
+      <ng-container *ngIf="kind() === 'text'">
+        <div class="preview-center" *ngIf="textLoading()">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        <div class="preview-center text-danger" *ngIf="textError()">
+          Could not load a preview of this file. Try downloading it instead.
+        </div>
+        <pre class="preview-text" *ngIf="textContent() !== null">{{ textContent() }}</pre>
+      </ng-container>
+
+      <!-- Word / Excel / PowerPoint - browsers can't render these natively -->
+      <div class="preview-center preview-unsupported" *ngIf="kind() === 'office'">
+        <i class="bi bi-file-earmark-text display-4 text-muted"></i>
+        <p class="mt-3 text-muted">
+          Word, Excel, and PowerPoint files can't be previewed directly in the browser.<br />
+          Download the file to open it in the matching application.
+        </p>
+      </div>
+
+      <!-- Unsupported type -->
+      <div class="preview-center preview-unsupported" *ngIf="kind() === 'unsupported'">
+        <i class="bi bi-file-earmark-x display-4 text-muted"></i>
+        <p class="mt-3 text-muted">
+          A preview isn't available for this file type.<br />
+          Please download it to view the contents.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>

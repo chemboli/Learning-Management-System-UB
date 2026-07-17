@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SmartLearning Invitation</title>
+</head>
+<!--
+    NOTE: email clients (Gmail, Outlook…) strip <style> blocks and classes,
+    so everything here uses tables + inline styles on purpose.
+-->
+<body style="margin:0; padding:0; background-color:#f1f3f9; font-family:'Segoe UI', Arial, Helvetica, sans-serif;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f3f9; padding:32px 16px;">
+    <tr>
+        <td align="center">
+
+            <table role="presentation" width="560" cellpadding="0" cellspacing="0"
+                   style="max-width:560px; width:100%; background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(16,24,64,0.08);">
+
+                <!-- Header -->
+                <tr>
+                    <td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); background-color:#4f46e5; padding:36px 40px; text-align:center;">
+                        <div style="font-size:40px; line-height:1;">&#127891;</div>
+                        <h1 style="margin:12px 0 4px; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:0.3px;">
+                            SmartLearning
+                        </h1>
+                        <p style="margin:0; color:#e0e7ff; font-size:14px;">
+                            Your learning portal invitation
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style="padding:36px 40px 8px;">
+                        <p style="margin:0 0 16px; color:#1f2937; font-size:16px;">
+                            Hello <strong th:text="${firstName}">there</strong>,
+                        </p>
+                        <p style="margin:0 0 24px; color:#4b5563; font-size:15px; line-height:1.6;">
+                            An administrator has created a SmartLearning account for you.
+                            To get started, activate your account using the invitation code below —
+                            you'll confirm your details and choose your own password.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Invitation code -->
+                <tr>
+                    <td style="padding:0 40px;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="background-color:#f5f3ff; border:2px dashed #c4b5fd; border-radius:10px; padding:20px; text-align:center;">
+                                    <p style="margin:0 0 6px; color:#6d28d9; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px;">
+                                        Your invitation code
+                                    </p>
+                                    <p style="margin:0; color:#4c1d95; font-size:28px; font-weight:700; letter-spacing:6px; font-family:'Courier New', Courier, monospace;"
+                                       th:text="${invitationCode}">
+                                        ABCD1234
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- CTA button -->
+                <tr>
+                    <td style="padding:28px 40px 8px;" align="center">
+                        <table role="presentation" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="border-radius:8px; background-color:#4f46e5;">
+                                    <a th:href="${activationLink}"
+                                       href="#"
+                                       style="display:inline-block; padding:14px 36px; color:#ffffff; font-size:15px; font-weight:600; text-decoration:none; border-radius:8px;">
+                                        Activate my account
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                        <p style="margin:16px 0 0; color:#9ca3af; font-size:12px; line-height:1.5;">
+                            Button not working? Copy and paste this link into your browser:<br/>
+                            <a th:href="${activationLink}" th:text="${activationLink}"
+                               href="#" style="color:#4f46e5; word-break:break-all;">activation link</a>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Steps -->
+                <tr>
+                    <td style="padding:24px 40px 8px;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                               style="background-color:#f9fafb; border-radius:10px; padding:4px;">
+                            <tr>
+                                <td style="padding:16px 20px;">
+                                    <p style="margin:0 0 10px; color:#374151; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;">
+                                        How it works
+                                    </p>
+                                    <p style="margin:0 0 6px; color:#4b5563; font-size:14px; line-height:1.6;">
+                                        <strong style="color:#4f46e5;">1.</strong>&nbsp; Open the activation page on the portal
+                                    </p>
+                                    <p style="margin:0 0 6px; color:#4b5563; font-size:14px; line-height:1.6;">
+                                        <strong style="color:#4f46e5;">2.</strong>&nbsp; Enter your invitation code — your details will load automatically
+                                    </p>
+                                    <p style="margin:0 0 6px; color:#4b5563; font-size:14px; line-height:1.6;">
+                                        <strong style="color:#4f46e5;">3.</strong>&nbsp; Choose a password for your account
+                                    </p>
+                                    <p style="margin:0; color:#4b5563; font-size:14px; line-height:1.6;">
+                                        <strong style="color:#4f46e5;">4.</strong>&nbsp; Sign in and start learning!
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Expiry note -->
+                <tr>
+                    <td style="padding:20px 40px 32px;">
+                        <p style="margin:0; color:#9ca3af; font-size:13px; line-height:1.6;">
+                            &#9200; This invitation expires on
+                            <strong style="color:#6b7280;" th:text="${expiryDate}">January 1, 2026</strong>.
+                            If it expires, ask your administrator to send a new one.
+                        </p>
+                        <p style="margin:12px 0 0; color:#9ca3af; font-size:13px; line-height:1.6;">
+                            If you did not expect this email, you can safely ignore it — no account
+                            will be activated without this code.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color:#f9fafb; border-top:1px solid #eef0f4; padding:20px 40px; text-align:center;">
+                        <p style="margin:0; color:#9ca3af; font-size:12px;">
+                            &copy; 2026 SmartLearning &middot;
+                            <a th:href="${portalUrl}" href="#" style="color:#6366f1; text-decoration:none;">Visit the portal</a>
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

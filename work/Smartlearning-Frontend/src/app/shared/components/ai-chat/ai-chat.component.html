@@ -1,0 +1,67 @@
+<ng-container *ngIf="auth.isLoggedIn()">
+
+  <button
+    *ngIf="!open()"
+    class="ai-chat-bubble"
+    (click)="toggle()"
+    title="Ask the AI assistant"
+  >
+    <i class="bi bi-chat-dots-fill"></i>
+  </button>
+
+  <div class="ai-chat-window" *ngIf="open()">
+    <div class="ai-chat-header">
+      <span class="fw-semibold">Assistant</span>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="toggle()"></button>
+    </div>
+
+    <div class="ai-chat-body">
+      <div class="ai-chat-empty" *ngIf="!available">
+        The AI assistant isn't set up on this server yet. Ask your administrator to configure a Gemini API key.
+      </div>
+
+      <ng-container *ngIf="available">
+        <div class="ai-chat-empty" *ngIf="messages().length === 0">
+          <ng-container *ngIf="auth.hasAnyRole('STUDENT')">
+            Ask me how you're doing in your courses, what to focus on next, or anything about your assignments.
+          </ng-container>
+          <ng-container *ngIf="auth.hasAnyRole('LECTURER')">
+            Ask me about how your courses are going — grading backlog, low-scoring assignments, students falling behind.
+          </ng-container>
+          <ng-container *ngIf="!auth.hasAnyRole('STUDENT') && !auth.hasAnyRole('LECTURER')">
+            Ask me anything.
+          </ng-container>
+        </div>
+
+        <div
+          *ngFor="let m of messages()"
+          class="ai-chat-message"
+          [class.from-user]="m.role === 'user'"
+          [class.from-assistant]="m.role === 'assistant'"
+        >
+          {{ m.content }}
+        </div>
+
+        <div class="ai-chat-message from-assistant ai-chat-typing" *ngIf="sending">
+          <span class="spinner-border spinner-border-sm"></span>
+        </div>
+      </ng-container>
+
+      <div #messagesEnd></div>
+    </div>
+
+    <div class="ai-chat-input" *ngIf="available">
+      <textarea
+        rows="1"
+        placeholder="Type a message…"
+        [(ngModel)]="draft"
+        (keydown)="onKeydown($event)"
+        [disabled]="sending"
+      ></textarea>
+      <button type="button" [disabled]="sending || !draft.trim()" (click)="send()">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+
+</ng-container>

@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h1 class="h3 mb-1">Edit note</h1>
+  <p class="lead mb-0">Update the note's details. To replace the file, delete and re-upload.</p>
+</div>
+
+@if (loading) {
+  <div class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else {
+  <div class="card" style="max-width: 720px;">
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="title">Title</label>
+          <input
+            id="title"
+            type="text"
+            class="form-control"
+            formControlName="title"
+            [class.is-invalid]="submitted && form.controls.title.invalid"
+          />
+          @if (submitted && form.controls.title.invalid) {
+            <div class="invalid-feedback">Title is required.</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="description">Description</label>
+          <textarea id="description" class="form-control" rows="3" formControlName="description"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold" for="noteType">Type</label>
+            <select id="noteType" class="form-select" formControlName="noteType">
+              <option value="LECTURE_NOTE">Lecture note</option>
+              <option value="LAB">Lab</option>
+              <option value="ASSIGNMENT">Assignment</option>
+              <option value="TUTORIAL">Tutorial</option>
+              <option value="PAST_EXAM">Past exam</option>
+            </select>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold" for="weekNumber">
+              Week number <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <input id="weekNumber" type="number" min="1" class="form-control" formControlName="weekNumber" />
+          </div>
+        </div>
+
+        <div class="form-check form-switch mb-4">
+          <input class="form-check-input" type="checkbox" id="published" formControlName="published" />
+          <label class="form-check-label fw-semibold" for="published">Published</label>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary fw-semibold" [disabled]="saving">
+            @if (saving) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            Save changes
+          </button>
+          <a class="btn btn-outline-secondary" (click)="goBack()">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+}

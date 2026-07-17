@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/mydb
+    username: postgres
+    password: postgres
+
+minio:
+  url: http://minio:9000
+  # Browser can't resolve the "minio" service name, so presigned URLs
+  # must use a host reachable from the host machine / your network.
+  # If you're hitting this from another machine, replace localhost
+  # with that machine's reachable hostname or IP.
+  public-url: http://localhost:9000

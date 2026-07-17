@@ -1,0 +1,110 @@
+<div class="page-header">
+  <h1 class="h3 mb-1">Upload note</h1>
+  <p class="lead mb-0">Share lecture notes, labs, assignments or past exams with students</p>
+</div>
+
+<div class="card" style="max-width: 720px;">
+  <div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="mb-3">
+        <label class="form-label fw-semibold" for="courseId">Course</label>
+        <select
+          id="courseId"
+          class="form-select"
+          formControlName="courseId"
+          [class.is-invalid]="submitted && form.controls.courseId.invalid"
+        >
+          <option value="" disabled>Select a course…</option>
+          @for (course of courses; track course.id) {
+            <option [value]="course.id">{{ course.courseCode }} — {{ course.title }}</option>
+          }
+        </select>
+        @if (submitted && form.controls.courseId.invalid) {
+          <div class="invalid-feedback">Select a course.</div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold" for="title">Title</label>
+        <input
+          id="title"
+          type="text"
+          class="form-control"
+          formControlName="title"
+          placeholder="e.g. Week 4 — Normalization"
+          [class.is-invalid]="submitted && form.controls.title.invalid"
+        />
+        @if (submitted && form.controls.title.invalid) {
+          <div class="invalid-feedback">Title is required.</div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold" for="description">Description</label>
+        <textarea
+          id="description"
+          class="form-control"
+          rows="3"
+          formControlName="description"
+          placeholder="A short summary of what this note covers"
+        ></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold" for="noteType">Type</label>
+          <select id="noteType" class="form-select" formControlName="noteType">
+            <option value="LECTURE_NOTE">Lecture note</option>
+            <option value="LAB">Lab</option>
+            <option value="ASSIGNMENT">Assignment</option>
+            <option value="TUTORIAL">Tutorial</option>
+            <option value="PAST_EXAM">Past exam</option>
+          </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold" for="weekNumber">
+            Week number <span class="text-muted fw-normal">(optional)</span>
+          </label>
+          <input id="weekNumber" type="number" min="1" class="form-control" formControlName="weekNumber" />
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold" for="file">File</label>
+        <input
+          id="file"
+          type="file"
+          class="form-control"
+          (change)="onFileSelected($event)"
+          [class.is-invalid]="submitted && !selectedFile"
+        />
+        @if (submitted && !selectedFile) {
+          <div class="invalid-feedback">Choose a file to upload.</div>
+        }
+        @if (selectedFile) {
+          <div class="form-text">
+            <i class="bi bi-paperclip me-1"></i>{{ selectedFile.name }}
+            ({{ (selectedFile.size / 1024).toFixed(0) }} KB)
+          </div>
+        }
+      </div>
+
+      <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="published" formControlName="published" />
+        <label class="form-check-label fw-semibold" for="published">Publish immediately</label>
+        <div class="form-text">Unpublished notes won't be visible to students yet.</div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary fw-semibold" [disabled]="uploading">
+          @if (uploading) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          <i class="bi bi-cloud-upload me-1"></i> Upload note
+        </button>
+        <a class="btn btn-outline-secondary" routerLink="/courses">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

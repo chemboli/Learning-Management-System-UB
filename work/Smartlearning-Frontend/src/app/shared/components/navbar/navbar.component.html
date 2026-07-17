@@ -1,0 +1,20 @@
+<header class="sl-topbar-fixed d-flex align-items-center justify-content-between px-3 px-lg-4">
+  <a class="sl-topbar-brand" routerLink="/dashboard">
+    <i class="bi bi-mortarboard-fill me-2"></i>
+    <span class="d-none d-sm-inline">SmartLearning</span>
+  </a>
+
+  <div class="d-flex align-items-center gap-2 gap-lg-3">
+    <a routerLink="/profile" class="sl-topbar-user">
+      <i class="bi bi-person-circle me-2"></i>
+      <span class="sl-topbar-user-name d-none d-md-inline">{{ auth.email() }}</span>
+      @if (auth.role()) {
+        <span class="badge role-badge ms-2 role-{{ auth.role() }}">{{ auth.role() }}</span>
+      }
+    </a>
+    <button class="btn btn-sm btn-light fw-semibold" (click)="logout()">
+      <i class="bi bi-box-arrow-right me-1"></i>
+      <span class="d-none d-sm-inline">Sign out</span>
+    </button>
+  </div>
+</header>

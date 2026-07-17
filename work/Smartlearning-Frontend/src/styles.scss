@@ -1,0 +1,510 @@
+// ==========================================================================
+// SmartLearning theme — Sky Blue
+// ==========================================================================
+
+// ---- Bootstrap variable overrides (must precede the Bootstrap import) ----
+$primary:       #0EA5E9; // sky-500 — main brand color
+$secondary:     #64748B; // slate
+$success:       #16A34A;
+$info:          #38BDF8; // sky-400
+$warning:       #F59E0B;
+$danger:        #DC2626;
+$light:         #F0F9FF; // sky-50
+$dark:          #0C4A6E; // sky-900
+
+$body-bg:       #F4FAFD;
+$body-color:    #0F2A3A;
+
+$font-family-sans-serif: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+$font-family-base: $font-family-sans-serif;
+
+$border-radius:        0.6rem;
+$border-radius-sm:     0.4rem;
+$border-radius-lg:     0.9rem;
+
+$card-border-radius:   $border-radius-lg;
+$card-border-color:    #DCEEF9;
+$card-box-shadow:      0 2px 14px rgba(14, 165, 233, 0.07);
+
+$navbar-padding-y:     0.85rem;
+
+$btn-border-radius:    0.55rem;
+$btn-font-weight:      600;
+
+$input-border-radius:  0.5rem;
+$input-border-color:   #CFE7F5;
+$input-focus-border-color: $primary;
+$input-focus-box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.15);
+
+$badge-font-weight: 600;
+
+// ---- Sidebar dimensions (used by .app-main offset rules and sidebar styles) ----
+$sl-sidebar-width: 264px;
+$sl-sidebar-width-collapsed: 76px;
+$sl-sidebar-topbar-h: 56px;
+
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+// ---- Custom design tokens ------------------------------------------------
+:root {
+  --sl-sky-50:  #F0F9FF;
+  --sl-sky-100: #E0F2FE;
+  --sl-sky-200: #BAE6FD;
+  --sl-sky-300: #7DD3FC;
+  --sl-sky-400: #38BDF8;
+  --sl-sky-500: #0EA5E9;
+  --sl-sky-600: #0284C7;
+  --sl-sky-700: #0369A1;
+  --sl-sky-800: #075985;
+  --sl-sky-900: #0C4A6E;
+  --sl-accent:  #FB923C; // warm coral-orange accent for contrast
+  --sl-surface: #FFFFFF;
+  --sl-shadow:  0 4px 24px rgba(14, 116, 144, 0.08);
+}
+
+// ---- Base ------------------------------------------------------------------
+html, body {
+  height: 100%;
+}
+
+body {
+  background: linear-gradient(180deg, #F4FAFD 0%, #EAF6FD 100%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sl-sky-900);
+}
+
+a {
+  text-decoration: none;
+}
+
+// ---- App shell --------------------------------------------------------------
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1.75rem 0 3rem;
+}
+
+.app-main.with-sidebar {
+  margin-left: $sl-sidebar-width;
+  margin-top: $sl-sidebar-topbar-h;
+  transition: margin-left 0.18s ease;
+}
+
+@media (max-width: 991.98px) {
+  .app-main.with-sidebar {
+    margin-left: 0;
+  }
+}
+
+// ---- Navbar -------------------------------------------------------------------
+.sl-navbar {
+  background: linear-gradient(135deg, var(--sl-sky-600) 0%, var(--sl-sky-500) 60%, var(--sl-sky-400) 100%);
+  box-shadow: 0 2px 16px rgba(2, 132, 199, 0.25);
+}
+
+.sl-navbar .navbar-brand {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 1.25rem;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sl-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.85rem !important;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.sl-navbar .nav-link.active,
+.sl-navbar .nav-link:hover {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.sl-navbar .navbar-text,
+.sl-navbar .btn-link {
+  color: #fff;
+}
+
+// ---- Cards --------------------------------------------------------------------
+.card {
+  border: 1px solid var(--sl-sky-100);
+}
+
+.card-hover {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.14);
+}
+
+// ---- Hero / page header ---------------------------------------------------------
+.page-header {
+  background: linear-gradient(120deg, var(--sl-sky-600), var(--sl-sky-400));
+  color: #fff;
+  border-radius: $border-radius-lg;
+  padding: 1.75rem 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--sl-shadow);
+}
+
+.page-header h1, .page-header h2 {
+  color: #fff;
+}
+
+.page-header .lead {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+// ---- Badges / role chips ----------------------------------------------------
+.role-badge {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.6rem;
+}
+
+.role-MASTER   { background-color: #0C4A6E !important; color: #fff; }
+.role-ADMIN    { background-color: #0284C7 !important; color: #fff; }
+.role-LECTURER { background-color: #38BDF8 !important; color: #062840; }
+.role-STUDENT  { background-color: #BAE6FD !important; color: #075985; }
+.role-USER     { background-color: #CBD5E1 !important; color: #334155; }
+
+// ---- Sidebar (deep-blue, University of Buea style) ----------------------
+$sl-sidebar-navy: #0B3D91;       // deep royal blue, matches the reference UI
+$sl-sidebar-navy-dark: #082c69;
+
+.sl-sidebar {
+  position: fixed;
+  top: $sl-sidebar-topbar-h;
+  left: 0;
+  bottom: 0;
+  width: $sl-sidebar-width;
+  background: $sl-sidebar-navy;
+  display: flex;
+  flex-direction: column;
+  z-index: 1040;
+  transition: width 0.18s ease, transform 0.18s ease;
+  overflow: hidden;
+}
+
+.sl-sidebar.collapsed {
+  width: $sl-sidebar-width-collapsed;
+}
+
+.sl-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 0.6rem;
+}
+
+.sl-sidebar-toolbar {
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.sl-nav-section {
+  margin-bottom: 0.2rem;
+}
+
+.sl-nav-section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sl-nav-section-toggle:hover,
+.sl-nav-section-toggle.active {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.sl-chevron {
+  transition: transform 0.15s ease;
+  font-size: 0.7rem;
+}
+
+.sl-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.sl-nav-children {
+  margin: 0.15rem 0 0.4rem;
+  padding: 0;
+}
+
+.sl-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.92rem;
+  padding: 0.55rem 0.7rem 0.55rem 1.9rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+
+.sl-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sl-nav-link.active {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-weight: 700;
+}
+
+.sl-nav-icon {
+  width: 1.1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sl-sidebar.collapsed .sl-nav-link {
+  padding-left: 0.7rem;
+  justify-content: center;
+}
+
+.sl-sidebar.collapsed .sl-nav-section-toggle {
+  justify-content: center;
+}
+
+// ---- Fixed top bar (brand left, user/role/sign-out right) ---------------
+.sl-topbar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $sl-sidebar-topbar-h;
+  background: $sl-sidebar-navy;
+  z-index: 1050;
+}
+
+@media (max-width: 991.98px) {
+  .sl-topbar-fixed {
+    padding-left: 3.2rem !important;
+  }
+}
+
+.sl-topbar-brand {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.sl-topbar-user {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.sl-topbar-user:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sl-topbar-user-name {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ---- Mobile sidebar toggle (separate from the fixed top bar) ------------
+.sl-mobile-toggle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: $sl-sidebar-topbar-h;
+  width: 3.2rem;
+  background: transparent;
+  border: none;
+  color: #fff;
+  z-index: 1055;
+}
+
+.sl-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1035;
+}
+
+@media (max-width: 991.98px) {
+  .sl-sidebar {
+    transform: translateX(-100%);
+    top: $sl-sidebar-topbar-h;
+    width: $sl-sidebar-width;
+  }
+
+  .sl-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+
+// ---- Misc ---------------------------------------------------------------------
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--sl-sky-700);
+}
+
+.empty-state i {
+  font-size: 2.75rem;
+  color: var(--sl-sky-300);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(240, 249, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.toast-container-fixed {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2100;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.text-sky {
+  color: var(--sl-sky-600) !important;
+}
+
+.bg-sky-50 {
+  background-color: var(--sl-sky-50) !important;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
+
+// ---- Auth pages ----------------------------------------------------------------
+.auth-wrap {
+  min-height: calc(100vh - 3rem);
+  padding: 2rem 0;
+}
+
+.auth-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--sl-sky-500), var(--sl-sky-300));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+
+// ---- Announcements -------------------------------------------------------
+.announcement-body {
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+// ---- Programming assignment test case / run-result display --------------
+.test-io-block {
+  background: #0f2a3a08;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.test-io-block-sm {
+  background: #0f2a3a08;
+  border-radius: 0.3rem;
+  padding: 0.3rem 0.4rem;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  max-width: 260px;
+  max-height: 100px;
+  overflow: auto;
+}

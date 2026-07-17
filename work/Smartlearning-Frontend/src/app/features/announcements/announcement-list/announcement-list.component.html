@@ -1,0 +1,68 @@
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+  <div>
+    <h3 class="fw-bold mb-1">Announcements</h3>
+    <p class="text-muted mb-0">Updates from your courses and the school.</p>
+  </div>
+
+  @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+    <a routerLink="/announcements/new" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1"></i> New announcement
+    </a>
+  }
+</div>
+
+@if (loading) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+} @else if (announcements().length === 0) {
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-megaphone display-4 d-block mb-3"></i>
+    No announcements yet.
+  </div>
+} @else {
+  <div class="d-flex flex-column gap-3">
+    @for (a of announcements(); track a.id) {
+      <div class="card" [class.border-danger]="a.priority === 'URGENT'">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <span class="badge text-bg-{{ priorityClass(a.priority) }}">{{ a.priority }}</span>
+                @if (a.sitewide) {
+                  <span class="badge text-bg-primary"><i class="bi bi-globe me-1"></i>Sitewide</span>
+                } @else {
+                  <span class="badge text-bg-light text-dark border">{{ a.courseCode }}</span>
+                }
+                @if (!a.published) {
+                  <span class="badge text-bg-secondary">Draft</span>
+                }
+                @if (a.expired) {
+                  <span class="badge text-bg-secondary">Expired</span>
+                }
+              </div>
+              <h5 class="fw-bold mb-1">{{ a.title }}</h5>
+              <p class="mb-2 announcement-body">{{ a.body }}</p>
+              <div class="text-muted small">
+                <i class="bi bi-person me-1"></i>{{ a.authorName }}
+                <span class="mx-2">&middot;</span>
+                <i class="bi bi-clock me-1"></i>{{ a.createdAt | date: 'medium' }}
+              </div>
+            </div>
+
+            @if (canManage(a)) {
+              <div class="d-flex gap-2 flex-shrink-0">
+                <a [routerLink]="['/announcements', a.id, 'edit']" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-sm btn-outline-danger" (click)="delete(a)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

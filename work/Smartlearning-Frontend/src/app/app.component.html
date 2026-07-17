@@ -1,0 +1,17 @@
+<div class="app-shell">
+  @if (auth.isLoggedIn()) {
+    <app-navbar></app-navbar>
+    <app-sidebar></app-sidebar>
+  }
+
+  <main class="app-main" [class.with-sidebar]="auth.isLoggedIn()">
+    <div class="container-fluid px-3 px-lg-4">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <app-toast-container></app-toast-container>
+  <app-confirm-dialog></app-confirm-dialog>
+  <app-file-preview></app-file-preview>
+  <app-ai-chat></app-ai-chat>
+</div>

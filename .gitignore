@@ -1,0 +1,18 @@
+# --- secrets ---
+.env
+.env.local
+*.env
+
+# --- backend (Java/Maven) ---
+work/SmartLearning-Backend/target/
+work/SmartLearning-Backend/.idea/
+work/SmartLearning-Backend/HELP.md
+*.iml
+*.ipr
+*.iws
+# --- frontend (Angular/Node) ---
+work/Smartlearning-Frontend/node_modules/
+work/Smartlearning-Frontend/dist/
+work/Smartlearning-Frontend/.angular/
+# --- editors ---
+.vscode/

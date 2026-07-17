@@ -1,0 +1,24 @@
+<div class="toast-container-fixed">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div
+      class="toast show align-items-center text-bg-{{ toast.type }} border-0 mb-2 shadow"
+      role="alert"
+    >
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2">
+          <i class="bi" [class.bi-check-circle-fill]="toast.type === 'success'"
+             [class.bi-exclamation-triangle-fill]="toast.type === 'danger'"
+             [class.bi-info-circle-fill]="toast.type === 'info'"
+             [class.bi-exclamation-circle-fill]="toast.type === 'warning'"></i>
+          <span>{{ toast.text }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          (click)="toastService.dismiss(toast.id)"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+  }
+</div>

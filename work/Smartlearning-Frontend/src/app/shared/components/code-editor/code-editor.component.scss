@@ -1,0 +1,13 @@
+.code-editor-host {
+  border: 1px solid var(--sl-sky-200, #bae6fd);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+::ng-deep .code-editor-host .cm-editor {
+  height: 360px;
+}
+
+::ng-deep .code-editor-host .cm-editor.cm-focused {
+  outline: none;
+}

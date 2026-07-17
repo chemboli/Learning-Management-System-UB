@@ -1,0 +1,487 @@
+@if (loading) {
+  <div class="text-center py-5">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else if (assignment) {
+  <div class="page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+      <span class="badge bg-light text-sky mb-2">{{ assignment.courseCode }}</span>
+      @if (!assignment.published) {
+        <span class="badge text-bg-secondary mb-2 ms-1">Draft</span>
+      }
+      @if (assignment.assignmentType === 'PROGRAMMING') {
+        <span class="badge text-bg-dark mb-2 ms-1">
+          <i class="bi bi-code-slash me-1"></i>{{ assignment.programmingLanguage }}
+        </span>
+      }
+      <h1 class="h3 mb-1">{{ assignment.title }}</h1>
+      <p class="lead mb-1">{{ assignment.description || 'No description provided.' }}</p>
+      <p class="mb-0 small">
+        <i class="bi bi-calendar-event me-1"></i>Due {{ assignment.dueDate | date: 'medium' }}
+        @if (assignment.overdue) {
+          <span class="badge text-bg-danger ms-2">Past due</span>
+        }
+        <span class="mx-2">·</span>
+        <i class="bi bi-person me-1"></i>{{ assignment.lecturerName }}
+        <span class="mx-2">·</span>
+        <i class="bi bi-trophy me-1"></i>{{ assignment.maxScore }} pts
+      </p>
+    </div>
+
+    @if (auth.hasAnyRole('MASTER', 'ADMIN', 'LECTURER')) {
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-light fw-semibold" [routerLink]="['/assignments', assignment.id, 'edit']">
+          <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+        <button class="btn btn-outline-light fw-semibold" (click)="deleteAssignment()">
+          <i class="bi bi-trash me-1"></i> Delete
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (assignment.assignmentType === 'PROGRAMMING' && assignment.testCases && assignment.testCases.length > 0) {
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="h6 mb-3"><i class="bi bi-ui-checks-grid me-2"></i>Sample test cases</h2>
+        <div class="d-flex flex-column gap-2">
+          @for (tc of assignment.testCases; track tc.id) {
+            <div class="border rounded p-2 small">
+              @if (tc.hidden) {
+                <span class="badge text-bg-secondary mb-1">Hidden test case ({{ tc.weight }} pts)</span>
+                <p class="text-muted mb-0">Input and expected output are withheld until you run your submission.</p>
+              } @else {
+                <div class="d-flex justify-content-between">
+                  <span class="fw-semibold">{{ tc.label || 'Test case' }}</span>
+                  <span class="text-muted">{{ tc.weight }} pts</span>
+                </div>
+                <div class="row mt-1">
+                  <div class="col-md-6">
+                    <div class="text-muted">Input</div>
+                    <pre class="test-io-block">{{ tc.input || '(empty)' }}</pre>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="text-muted">Expected output</div>
+                    <pre class="test-io-block">{{ tc.expectedOutput || '(empty)' }}</pre>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (auth.hasAnyRole('STUDENT')) {
+    @if (mySubmissionLoading) {
+      <div class="card mb-3">
+        <div class="card-body text-center py-4">
+          <span class="spinner-border text-primary"></span>
+        </div>
+      </div>
+    } @else if (!mySubmission) {
+      <div class="card mb-3">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Submit your work</h2>
+
+          @if (assignment.assignmentType === 'PROGRAMMING') {
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <button
+                  type="button"
+                  class="nav-link"
+                  [class.active]="submissionMode === 'upload'"
+                  (click)="submissionMode = 'upload'"
+                >
+                  <i class="bi bi-upload me-1"></i> Upload file
+                </button>
+              </li>
+              <li class="nav-item">
+                <button
+                  type="button"
+                  class="nav-link"
+                  [class.active]="submissionMode === 'editor'"
+                  (click)="submissionMode = 'editor'"
+                >
+                  <i class="bi bi-code-slash me-1"></i> Write code
+                </button>
+              </li>
+            </ul>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="submitWork()" novalidate>
+
+            @if (submissionMode === 'upload') {
+              <div class="mb-3">
+                <label class="form-label fw-semibold" for="file">File</label>
+                <input
+                  id="file"
+                  type="file"
+                  class="form-control"
+                  (change)="onFileSelected($event)"
+                  [class.is-invalid]="submitted && !selectedFile"
+                />
+                @if (submitted && !selectedFile) {
+                  <div class="invalid-feedback">Choose a file to submit.</div>
+                }
+                @if (selectedFile) {
+                  <div class="form-text">
+                    <i class="bi bi-paperclip me-1"></i>{{ selectedFile.name }}
+                    ({{ (selectedFile.size / 1024).toFixed(0) }} KB)
+                  </div>
+                }
+                @if (assignment.assignmentType === 'PROGRAMMING') {
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Submit a single plain-text source file (.{{ assignment.programmingLanguage === 'PYTHON' ? 'py' : assignment.programmingLanguage === 'JAVA' ? 'java' : assignment.programmingLanguage === 'CPP' ? 'cpp' : 'c' }}).
+                    Your code will run automatically once your lecturer grades it.
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Code</label>
+                <app-code-editor
+                  [language]="assignment.programmingLanguage ?? 'JAVA'"
+                  (valueChange)="onEditorChange($event)"
+                />
+                @if (submitted && !editorCode.trim()) {
+                  <div class="text-danger small mt-1">Write some code before submitting.</div>
+                }
+                <div class="form-text">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Your code will be submitted as a single source file and run once your lecturer grades it.
+                </div>
+              </div>
+            }
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="comment">
+                Note to lecturer <span class="text-muted fw-normal">(optional)</span>
+              </label>
+              <textarea id="comment" class="form-control" rows="2" formControlName="comment"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary fw-semibold" [disabled]="uploading">
+              @if (uploading) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              <i class="bi bi-upload me-1"></i> Submit
+            </button>
+
+            <div class="form-text mt-2">
+              You can only submit once. If you need to make changes afterwards, you can unsubmit and try again, as long as your lecturer hasn't graded it yet.
+            </div>
+
+            @if (assignment.overdue) {
+              <div class="text-danger small mt-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>This assignment is past due. You can still submit, but it will be marked late.
+              </div>
+            }
+          </form>
+        </div>
+      </div>
+    } @else {
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
+            <h2 class="h5 mb-0">Your submission</h2>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary" (click)="preview(mySubmission)">
+                <i class="bi bi-eye me-1"></i> Preview
+              </button>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                [disabled]="unsubmitting || (mySubmission.score !== null && mySubmission.score !== undefined && !mySubmission.autoGraded)"
+                [title]="(mySubmission.score !== null && mySubmission.score !== undefined && !mySubmission.autoGraded) ? 'Already graded by your lecturer — contact them to resubmit' : 'Withdraw this submission so you can submit again'"
+                (click)="unsubmit()"
+              >
+                @if (unsubmitting) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                } @else {
+                  <i class="bi bi-arrow-counterclockwise me-1"></i>
+                }
+                Unsubmit
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+            <span class="fw-semibold">{{ mySubmission.fileName }}</span>
+            @if (mySubmission.reviewed) {
+              <span class="badge text-bg-success">Reviewed</span>
+            } @else {
+              <span class="badge text-bg-info">Submitted</span>
+            }
+            @if (mySubmission.late) {
+              <span class="badge text-bg-danger">Late</span>
+            }
+            @if (mySubmission.score !== null && mySubmission.score !== undefined) {
+              <span class="badge text-bg-primary">
+                {{ mySubmission.score }} / {{ mySubmission.maxScore }}
+                @if (mySubmission.autoGraded) { <i class="bi bi-cpu ms-1" title="Auto-graded"></i> }
+              </span>
+            }
+          </div>
+          @if (mySubmission.comment) {
+            <p class="text-muted small mb-1">"{{ mySubmission.comment }}"</p>
+          }
+          @if (mySubmission.feedback) {
+            <p class="small mb-1"><i class="bi bi-chat-left-text me-1"></i>{{ mySubmission.feedback }}</p>
+          }
+          <p class="text-muted small mb-0">
+            <i class="bi bi-calendar me-1"></i>{{ mySubmission.submittedAt | date: 'medium' }}
+          </p>
+
+          @if (mySubmission.lastRunResult && mySubmission.lastRunResult.length > 0) {
+            <div class="mt-2 pt-2 border-top">
+              <div class="text-muted small mb-1">Automated test results from your submission:</div>
+              <div class="d-flex flex-wrap gap-2">
+                @for (r of mySubmission.lastRunResult; track r.testCaseId) {
+                  <span
+                    class="badge"
+                    [class.text-bg-success]="r.passed"
+                    [class.text-bg-danger]="!r.passed"
+                    [title]="r.hidden ? 'Hidden test case' : (r.label || 'Test case')"
+                  >
+                    @if (r.passed) { <i class="bi bi-check-lg"></i> } @else { <i class="bi bi-x-lg"></i> }
+                    {{ r.label || (r.hidden ? 'Hidden' : 'Test') }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER') && submissions.length > 0) {
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Score distribution</h2>
+        <app-score-chart [bars]="scoreChartBars()" valueSuffix="" />
+      </div>
+    </div>
+  }
+
+  @if (auth.hasAnyRole('LECTURER', 'ADMIN', 'MASTER')) {
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Submissions</h2>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-sky-50 text-sky">{{ submissions.length }} total</span>
+            @if (assignment.assignmentType === 'PROGRAMMING') {
+              <button class="btn btn-sm btn-outline-dark" [disabled]="runningAll" (click)="runAll()">
+                @if (runningAll) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                } @else {
+                  <i class="bi bi-play-fill me-1"></i>
+                }
+                Run all
+              </button>
+            }
+            <button class="btn btn-sm btn-outline-secondary" [disabled]="exportingCsv" (click)="downloadScoresCsv()">
+              @if (exportingCsv) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              } @else {
+                <i class="bi bi-download me-1"></i>
+              }
+              Download scores (CSV)
+            </button>
+          </div>
+        </div>
+
+        @if (submissionsLoading) {
+          <div class="text-center py-4">
+            <span class="spinner-border text-primary"></span>
+          </div>
+        } @else if (submissions.length === 0) {
+          <div class="empty-state py-4">
+            <i class="bi bi-inbox"></i>
+            <p class="mb-0">No students have submitted work yet.</p>
+          </div>
+        } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (s of submissions; track s.id) {
+              <div class="border rounded p-3">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                  <div>
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                      <span class="fw-semibold">{{ s.studentName }}</span>
+                      <span class="text-muted small">{{ s.fileName }}</span>
+                      @if (s.reviewed) {
+                        <span class="badge text-bg-success">Reviewed</span>
+                      } @else {
+                        <span class="badge text-bg-info">Pending review</span>
+                      }
+                      @if (s.late) {
+                        <span class="badge text-bg-danger">Late</span>
+                      }
+                      @if (s.score !== null && s.score !== undefined) {
+                        <span class="badge text-bg-primary">
+                          {{ s.score }} / {{ s.maxScore }}
+                          @if (s.autoGraded) { <i class="bi bi-cpu ms-1" title="Auto-graded"></i> }
+                        </span>
+                      }
+                      @if (s.aiLikelihoodPercent !== undefined && s.aiLikelihoodPercent !== null) {
+                        <span class="badge text-bg-{{ aiLikelihoodClass(s.aiLikelihoodPercent) }}" title="AI-likelihood estimate — not proof">
+                          {{ s.aiLikelihoodPercent }}% AI-like
+                        </span>
+                      }
+                    </div>
+                    <p class="text-muted small mb-0">
+                      <i class="bi bi-calendar me-1"></i>{{ s.submittedAt | date: 'medium' }}
+                      @if (s.gradedByName) {
+                        <span class="mx-2">·</span><i class="bi bi-check2-square me-1"></i>Graded by {{ s.gradedByName }}
+                      }
+                    </p>
+                  </div>
+
+                  <div class="d-flex gap-2 flex-shrink-0">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="preview(s)">
+                      <i class="bi bi-eye me-1"></i> Preview
+                    </button>
+                    @if (s.sourceCode) {
+                      <button class="btn btn-sm btn-outline-secondary" (click)="toggleCode(s)">
+                        <i class="bi bi-code-slash me-1"></i>
+                        {{ isCodeOpen(s) ? 'Hide code' : 'View code' }}
+                      </button>
+                    }
+                    @if (s.canRun) {
+                      <button class="btn btn-sm btn-outline-dark" [disabled]="isRunning(s)" (click)="runSubmission(s)">
+                        @if (isRunning(s)) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>
+                        } @else {
+                          <i class="bi bi-play-fill me-1"></i>
+                        }
+                        Run & grade
+                      </button>
+                    }
+                    @if (!s.reviewed) {
+                      <button class="btn btn-sm btn-outline-success" (click)="markReviewed(s)">
+                        <i class="bi bi-check-lg me-1"></i> Mark reviewed
+                      </button>
+                    }
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      [disabled]="isAnalyzing(s) || !s.hasReadableText"
+                      [title]="s.hasReadableText ? 'Estimate how likely this submission is AI-written' : 'AI analysis only supports plain-text submissions right now'"
+                      (click)="analyzeForAi(s)"
+                    >
+                      @if (isAnalyzing(s)) {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                      }
+                      Check for AI
+                    </button>
+                    <button class="btn btn-sm btn-primary" (click)="startGrading(s)">
+                      <i class="bi bi-pencil-square me-1"></i> Grade
+                    </button>
+                  </div>
+                </div>
+
+                @if (s.aiAnalysisExplanation) {
+                  <div class="mt-2 pt-2 border-top">
+                    <div class="alert alert-light border small mb-0 py-2">
+                      <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                          <span class="badge text-bg-{{ aiLikelihoodClass(s.aiLikelihoodPercent) }} me-2">
+                            {{ s.aiLikelihoodPercent }}% AI-like
+                          </span>
+                          {{ s.aiAnalysisExplanation }}
+                        </div>
+                      </div>
+                      <div class="text-muted mt-1" style="font-size: 0.78rem;">
+                        <i class="bi bi-info-circle me-1"></i>This is an estimate, not proof. Use it as a prompt to look closer, not as grounds for an accusation on its own.
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                @if (s.comment) {
+                  <p class="text-muted small mt-2 mb-0">Student note: "{{ s.comment }}"</p>
+                }
+
+                @if (isCodeOpen(s) && s.sourceCode) {
+                  <div class="mt-2 pt-2 border-top">
+                    <div class="small text-muted mb-1">Submitted code: {{ s.fileName }}</div>
+                    <pre class="test-io-block" style="max-height: 360px;">{{ s.sourceCode }}</pre>
+                  </div>
+                }
+
+                @if (s.lastRunResult && s.lastRunResult.length > 0) {
+                  <div class="mt-2 pt-2 border-top">
+                    <div class="small text-muted mb-1">Last run: {{ s.lastRunAt | date: 'medium' }}</div>
+                    <div class="table-responsive">
+                      <table class="table table-sm align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th>Test</th>
+                            <th>Status</th>
+                            <th>Expected</th>
+                            <th>Actual</th>
+                            <th class="text-end">Pts</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (r of s.lastRunResult; track r.testCaseId) {
+                            <tr>
+                              <td>{{ r.label || 'Test case' }} @if (r.hidden) { <span class="badge text-bg-secondary ms-1">hidden</span> }</td>
+                              <td>
+                                @if (r.passed) {
+                                  <span class="badge text-bg-success">Pass</span>
+                                } @else {
+                                  <span class="badge text-bg-danger">{{ r.status }}</span>
+                                }
+                              </td>
+                              <td><pre class="test-io-block-sm">{{ r.expectedOutput ?? '(hidden)' }}</pre></td>
+                              <td><pre class="test-io-block-sm">{{ r.actualOutput }}</pre></td>
+                              <td class="text-end">{{ r.awarded }} / {{ r.weight }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+
+                @if (gradingSubmissionId === s.id) {
+                  <div class="mt-3 pt-3 border-top">
+                    <form [formGroup]="gradeForm" (ngSubmit)="saveGrade(s)">
+                      <div class="row g-2 align-items-end">
+                        <div class="col-sm-3">
+                          <label class="form-label small fw-semibold">Score (max {{ assignment.maxScore }})</label>
+                          <input type="number" class="form-control" formControlName="score" [max]="assignment.maxScore" min="0" />
+                        </div>
+                        <div class="col-sm-6">
+                          <label class="form-label small fw-semibold">Feedback</label>
+                          <input type="text" class="form-control" formControlName="feedback" placeholder="Optional comments for the student" />
+                        </div>
+                        <div class="col-sm-3 d-flex gap-2">
+                          <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="savingGrade">
+                            @if (savingGrade) {
+                              <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            Save
+                          </button>
+                          <button type="button" class="btn btn-outline-secondary" (click)="cancelGrading()">Cancel</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+} @else {
+  <div class="empty-state">
+    <i class="bi bi-exclamation-triangle"></i>
+    <p class="mb-0">Assignment not found.</p>
+  </div>
+}
