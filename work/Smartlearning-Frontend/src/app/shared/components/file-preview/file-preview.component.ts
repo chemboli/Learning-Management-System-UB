@@ -86,7 +86,12 @@ export class FilePreviewComponent implements OnDestroy {
           }
         });
       }
-    });
+    }, { allowSignalWrites: true });
+    // Required on Angular 18: this effect writes to signals (textContent,
+    // textError, pdfError, pdfBlobUrl via releaseBlobUrl) as part of its
+    // normal reset-then-load logic every time `file` or `kind` changes.
+    // Without this option the write throws NG0600. (Angular 19+ allows
+    // signal writes in effects by default, but this project is on 18.2.)
   }
 
   ngOnDestroy(): void {
