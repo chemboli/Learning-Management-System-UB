@@ -13,5 +13,7 @@
   <app-toast-container></app-toast-container>
   <app-confirm-dialog></app-confirm-dialog>
   <app-file-preview></app-file-preview>
-  <app-ai-chat></app-ai-chat>
+  @if (auth.isLoggedIn()) {
+    <app-ai-chat></app-ai-chat>
+  }
 </div>
