@@ -26,12 +26,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       if (err.status === 0) {
         message = 'Cannot reach the server. Check your connection.';
-      } else if (err.status === 401) {
-        message = 'Your session has expired. Please sign in again.';
-        auth.logout();
-        router.navigate(['/login']);
-      } else if (err.status === 403) {
-        message = "You don't have permission to do that.";
+      } else if (err.status === 401 || err.status === 403) {
+        const isAuthAttempt = req.url.includes('/auth/login') || req.url.includes('/auth/register');
+        if (isAuthAttempt) {
+          // Keep whatever message the backend sent (already extracted above) —
+          // this is a login/register failure, not an expired session.
+        } else if (err.status === 401) {
+          message = 'Your session has expired. Please sign in again.';
+          auth.logout();
+          router.navigate(['/login']);
+        } else {
+          message = "You don't have permission to do that.";
+        }
       }
 
       toast.error(message);
