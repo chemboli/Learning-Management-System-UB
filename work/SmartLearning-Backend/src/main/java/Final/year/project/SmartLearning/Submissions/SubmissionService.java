@@ -21,11 +21,7 @@ import Final.year.project.SmartLearning.dto.SubmissionResponse;
 import Final.year.project.SmartLearning.shared.CsvWriter;
 import Final.year.project.SmartLearning.storage.MinioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +50,6 @@ public class SubmissionService {
     private final CodeExecutionService codeExecutionService;
     private final AiService aiService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Qualifier("publicMinioClient")
-    private final MinioClient publicMinioClient;
 
     /** File extensions that we treat as plain-text source code for the auto-grader. */
     private static final Set<String> CODE_EXTENSIONS = Set.of(
@@ -547,18 +539,7 @@ public class SubmissionService {
     }
 
     private String generateUrl(String objectName) {
-        try {
-            return publicMinioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .bucket("smartlearning")
-                            .object(objectName)
-                            .method(Method.GET)
-                            .expiry(7, TimeUnit.DAYS)
-                            .build()
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return minioService.buildPublicUrl(objectName);
     }
 
     private SubmissionResponse toResponse(Submission submission, User viewer) {

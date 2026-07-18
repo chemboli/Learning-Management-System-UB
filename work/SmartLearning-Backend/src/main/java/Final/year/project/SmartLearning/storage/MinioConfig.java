@@ -36,16 +36,12 @@ public class MinioConfig {
                 .region(region)
                 .build();
     }
-
-    /** Used ONLY to generate presigned download URLs returned to the browser. */
-    @Bean
-    @Qualifier("publicMinioClient")
-    public MinioClient publicMinioClient() {
-
-        return MinioClient.builder()
-                .endpoint(publicUrl)
-                .credentials(accessKey, secretKey)
-                .region(region)
-                .build();
-    }
 }
+
+
+
+
+
+
+
+

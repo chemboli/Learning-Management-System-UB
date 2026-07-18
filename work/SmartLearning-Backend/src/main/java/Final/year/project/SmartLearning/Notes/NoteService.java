@@ -8,11 +8,7 @@ import Final.year.project.SmartLearning.dto.CreateNoteRequest;
 import Final.year.project.SmartLearning.dto.NoteResponse;
 import Final.year.project.SmartLearning.dto.UpdateNoteRequest;
 import Final.year.project.SmartLearning.storage.MinioService;
-import io.minio.MinioClient;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +25,6 @@ public class NoteService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final MinioService minioService;
-
-    @Qualifier("publicMinioClient")
-    private final MinioClient publicMinioClient;
 
     public NoteResponse upload(
             MultipartFile file,
@@ -100,18 +92,7 @@ public class NoteService {
     }
 
     private String generateUrl(String objectName) {
-        try {
-            return publicMinioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .bucket("smartlearning")
-                            .object(objectName)
-                            .method(Method.GET)
-                            .expiry(7, TimeUnit.DAYS)
-                            .build()
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return minioService.buildPublicUrl(objectName);
     }
 
     private NoteResponse toResponse(Note note, String url) {
