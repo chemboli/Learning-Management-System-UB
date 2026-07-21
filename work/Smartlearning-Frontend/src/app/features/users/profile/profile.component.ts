@@ -45,7 +45,7 @@ export class ProfileComponent implements OnInit {
           lastName: user.lastName,
           matricule: user.matricule ?? ''
         });
-        this.auth.refreshIdentity(user.email, user.role);
+        this.auth.refreshIdentity(user.email, user.role, user.firstName);
         this.loading = false;
       },
       error: () => (this.loading = false)

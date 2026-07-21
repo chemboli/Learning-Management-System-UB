@@ -14,6 +14,7 @@ import {
 const TOKEN_KEY = 'sl_token';
 const EMAIL_KEY = 'sl_email';
 const ROLE_KEY = 'sl_role';
+const NAME_KEY = 'sl_name';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -22,9 +23,12 @@ export class AuthService {
   private tokenSig = signal<string | null>(localStorage.getItem(TOKEN_KEY));
   private emailSig = signal<string | null>(localStorage.getItem(EMAIL_KEY));
   private roleSig = signal<Role | null>(localStorage.getItem(ROLE_KEY) as Role | null);
+  private nameSig = signal<string | null>(localStorage.getItem(NAME_KEY));
 
   email = computed(() => this.emailSig());
   role = computed(() => this.roleSig());
+  /** First name if available, otherwise falls back to the email so the UI always has something to show. */
+  name = computed(() => this.nameSig() ?? this.emailSig());
   isLoggedIn = computed(() => !!this.tokenSig() && this.isTokenStructurallyValid());
 
   constructor(private http: HttpClient) {}
@@ -92,6 +96,11 @@ export class AuthService {
       this.emailSig.set(res.email);
     }
 
+    if (res?.firstName) {
+      localStorage.setItem(NAME_KEY, res.firstName);
+      this.nameSig.set(res.firstName);
+    }
+
     if (res?.role) {
       const normalized = res.role.replace(/^ROLE_/, '') as Role;
       localStorage.setItem(ROLE_KEY, normalized);
@@ -103,18 +112,25 @@ export class AuthService {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(EMAIL_KEY);
     localStorage.removeItem(ROLE_KEY);
+    localStorage.removeItem(NAME_KEY);
     this.tokenSig.set(null);
     this.emailSig.set(null);
     this.roleSig.set(null);
+    this.nameSig.set(null);
   }
 
-  /** Call after fetching /users/me, in case the role changed server-side. */
-  refreshIdentity(email: string, role: Role) {
+  /** Call after fetching /users/me, in case the role (or name) changed server-side. */
+  refreshIdentity(email: string, role: Role, firstName?: string) {
     const normalized = role.replace(/^ROLE_/, '') as Role;
     localStorage.setItem(EMAIL_KEY, email);
     localStorage.setItem(ROLE_KEY, normalized);
     this.emailSig.set(email);
     this.roleSig.set(normalized);
+
+    if (firstName) {
+      localStorage.setItem(NAME_KEY, firstName);
+      this.nameSig.set(firstName);
+    }
   }
 
   hasAnyRole(...roles: Role[]): boolean {

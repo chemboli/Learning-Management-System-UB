@@ -1,6 +1,5 @@
 <div class="page-header">
-  <h1 class="h3 mb-1">Welcome back{{ auth.email() ? ',' : '' }} {{ auth.email() }}</h1>
-  <p class="lead mb-0">
+  <h1 class="h3 mb-1">Welcome back{{ auth.name() ? ',' : '' }} {{ auth.name() }}</h1>  <p class="lead mb-0">
     @switch (auth.role()) {
       @case ('STUDENT') { Browse your courses, check assignments, and catch up on notes. }
       @case ('LECTURER') { Manage your courses, assignments, and course materials. }

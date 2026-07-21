@@ -426,6 +426,10 @@ $sl-sidebar-navy-dark: #082c69;
   top: 1rem;
   right: 1rem;
   z-index: 2100;
+
+  .toast.text-bg-success {
+    color: #fff;
+  }
 }
 
 .cursor-pointer {
